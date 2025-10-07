@@ -26,9 +26,9 @@ export const drawShape = (canvas: HTMLCanvasElement, shape: string) => {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  console.log(`Shape name is ${shape}`);
+  console.log("Shape name is", shape);
 
-  ctx.fillStyle = "rgba(0,0,0)";
+  ctx.fillStyle = "rgba(0, 0, 0)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   let startX: number = 0;
@@ -36,6 +36,7 @@ export const drawShape = (canvas: HTMLCanvasElement, shape: string) => {
   let height: number = 0;
   let width: number = 0;
   let clicked: boolean = false;
+  let pencilPath: { x: number; y: number }[] = [];
 
   canvas.addEventListener("mousedown", (event: MouseEvent) => {
     clicked = true;
@@ -46,6 +47,7 @@ export const drawShape = (canvas: HTMLCanvasElement, shape: string) => {
 
   canvas.addEventListener("mouseup", (event: MouseEvent) => {
     clicked = false;
+    pencilPath = [];
     const rect = canvas.getBoundingClientRect();
     if (shape == "rect") {
       existingShape.push({
@@ -55,7 +57,7 @@ export const drawShape = (canvas: HTMLCanvasElement, shape: string) => {
         width: width,
         height: height,
       });
-    } else if ((shape = "arc")) {
+    } else if (shape == "arc") {
       const radius = Math.sqrt(width ** 2 + height ** 2);
       existingShape.push({
         type: "arc",
@@ -63,7 +65,7 @@ export const drawShape = (canvas: HTMLCanvasElement, shape: string) => {
         startY: startY,
         radius: radius,
       });
-    } else if ((shape = "line")) {
+    } else if (shape == "line") {
       existingShape.push({
         type: "line",
         startX: startX,
@@ -78,28 +80,46 @@ export const drawShape = (canvas: HTMLCanvasElement, shape: string) => {
     if (clicked) {
       const rect = canvas.getBoundingClientRect();
       width = event.clientX - startX - rect.left;
-      height: event.clientY - startY - rect.top;
+      height = event.clientY - startY - rect.top;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "rgba(0,0,0)";
+      ctx.fillStyle = "rgba(0, 0, 0)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       drawShapesBeforeClear(ctx, canvas, existingShape);
 
-      if ((shape = "rect")) {
+      if (shape == "rect") {
         ctx.strokeStyle = "white";
         ctx.strokeRect(startX, startY, width, height);
-      } else if ((shape = "arc")) {
+      } else if (shape == "arc") {
         const radius = Math.sqrt(width ** 2 + height ** 2);
         ctx.beginPath();
         ctx.strokeStyle = "white";
-        ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+        ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
         ctx.stroke();
-      } else if (shape === "line") {
+      } else if (shape == "line") {
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
         ctx.strokeStyle = "white";
+        ctx.stroke();
+      } else {
+        const currentX = event.clientX - rect.left;
+        const currentY = event.clientY - rect.top;
+        pencilPath.push({ x: currentX, y: currentY });
+
+        ctx.beginPath();
+        ctx.strokeStyle = "white";
+
+        for (let i = 1; i < pencilPath.length; i++) {
+          const prev = pencilPath[i - 1];
+          const curr = pencilPath[i];
+          if (prev !== undefined && curr !== undefined) {
+            ctx.moveTo(prev.x, prev.y);
+            ctx.lineTo(curr.x, curr.y);
+            console.log("#33");
+          }
+        }
         ctx.stroke();
       }
     }
@@ -112,15 +132,15 @@ const drawShapesBeforeClear = (
   existingShape: ExistingShape[]
 ) => {
   existingShape.map((shape: ExistingShape) => {
-    if (shape.type === "rect") {
+    if (shape.type == "rect") {
       ctx.strokeStyle = "white";
       ctx.strokeRect(shape.startX, shape.startY, shape.width, shape.height);
-    } else if (shape.type === "arc") {
+    } else if (shape.type == "arc") {
       ctx.beginPath();
-      ctx.arc(shape.startX, shape.startY, shape.radius, 0, Math.PI * 2);
+      ctx.arc(shape.startX, shape.startY, shape.radius, 0, 2 * Math.PI); // Circle centered at (100, 100) with radius 50
       ctx.strokeStyle = "white";
       ctx.stroke();
-    } else if (shape.type === "line") {
+    } else if (shape.type == "line") {
       ctx.beginPath();
       ctx.moveTo(shape.startX, shape.startY);
       ctx.lineTo(shape.moveX, shape.moveY);

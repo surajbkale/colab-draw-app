@@ -4,7 +4,7 @@ import { drawShape } from "../utils/drawshape";
 
 const page = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [shape, setShape] = useState<string>("line");
+  const [shape, setShape] = useState<string>("pencil");
 
   useEffect(() => {
     if (canvasRef.current) {
