@@ -19,7 +19,7 @@ function Auth() {
           <div className="flex justify-center">
             <LogIn className="h-12 w-12 text-blue-500" />
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold">Welcome back</h2>
+          <h2 className="mt-6 text-3xl font-extrabold">Welcome</h2>
           <p className="mt-2 text-sm text-gray-400">
             Sign in to continue to Whiteboard
           </p>
