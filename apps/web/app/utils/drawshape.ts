@@ -1,3 +1,8 @@
+interface Pencil {
+  x: number;
+  y: number;
+}
+
 type ExistingShape =
   | {
       type: "rect";
@@ -18,6 +23,10 @@ type ExistingShape =
       startY: number;
       moveX: number;
       moveY: number;
+    }
+  | {
+      type: "pencil";
+      path: Pencil[];
     };
 
 const existingShape: ExistingShape[] = [];
@@ -36,7 +45,7 @@ export const drawShape = (canvas: HTMLCanvasElement, shape: string) => {
   let height: number = 0;
   let width: number = 0;
   let clicked: boolean = false;
-  let pencilPath: { x: number; y: number }[] = [];
+  let pencilPath: Pencil[] = [];
 
   canvas.addEventListener("mousedown", (event: MouseEvent) => {
     clicked = true;
@@ -72,6 +81,11 @@ export const drawShape = (canvas: HTMLCanvasElement, shape: string) => {
         startY: startY,
         moveX: event.clientX - rect.left,
         moveY: event.clientY - rect.top,
+      });
+    } else if (shape == "pencil") {
+      existingShape.push({
+        type: "pencil",
+        path: pencilPath,
       });
     }
   });
@@ -146,6 +160,20 @@ const drawShapesBeforeClear = (
       ctx.lineTo(shape.moveX, shape.moveY);
       ctx.strokeStyle = "white";
       ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.strokeStyle = "white";
+
+      for (let i = 1; i < shape.path.length; i++) {
+        const prev = shape.path[i - 1];
+        const curr = shape.path[i];
+        if (prev !== undefined && curr !== undefined) {
+          ctx.moveTo(prev.x, prev.y);
+          ctx.lineTo(curr.x, curr.y);
+        }
+      }
+      ctx.stroke();
+      console.log(existingShape);
     }
   });
 };
