@@ -62,10 +62,13 @@ export const drawShape = (
     const rect = canvas.getBoundingClientRect();
 
     // socket logic to send messages to the backend server
+    console.log(`Hello from my side broh`);
     socket.send("message from client");
     socket.onmessage = (event) => {
       console.log(`Hi there ${event.data}`);
     };
+
+    // socket logic to send messages to the backend server ;
 
     if (shape == "rect") {
       existingShape.push({
