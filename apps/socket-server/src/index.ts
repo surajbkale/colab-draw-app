@@ -27,6 +27,10 @@ const handleMessages = (users: User[], data: Message, ws: WebSocket) => {
         user.ws.send(data.message);
       }
     });
+  } else {
+    users.map((user) => {
+      user.ws.send(data.message);
+    });
   }
 };
 
