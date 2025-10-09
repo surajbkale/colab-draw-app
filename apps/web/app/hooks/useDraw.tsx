@@ -5,6 +5,7 @@ export type Tool =
   | "pencil"
   | "rectangle"
   | "ellipse"
+  | "line"
   | "text"
   | "eraser"
   | "undo"

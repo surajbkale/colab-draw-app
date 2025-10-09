@@ -1,5 +1,6 @@
 import {
   MousePointer2,
+  MoveUpRight,
   Pencil,
   Square,
   Circle,
@@ -20,6 +21,7 @@ const Toolbar = ({ setTool }: ToolProps) => {
     { id: "pencil" as Tool, icon: Pencil },
     { id: "rectangle" as Tool, icon: Square },
     { id: "ellipse" as Tool, icon: Circle },
+    { id: "line" as Tool, icon: MoveUpRight },
     { id: "text" as Tool, icon: Type },
     { id: "eraser" as Tool, icon: Eraser },
     { id: "undo" as Tool, icon: Undo2 },

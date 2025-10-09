@@ -1,3 +1,5 @@
+import { Tool } from "../hooks/useDraw";
+
 interface Pencil {
   x: number;
   y: number;
@@ -33,12 +35,13 @@ const existingShape: ExistingShape[] = [];
 
 export const drawShape = (
   canvas: HTMLCanvasElement,
-  shape: string,
+  tool: Tool,
   socket: WebSocket
 ) => {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
+  console.log(`Selected tool is ${tool}`);
   // ctx.fillStyle = "rgb(255, 255, 255)";
   // ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -70,7 +73,7 @@ export const drawShape = (
 
     // socket logic to send messages to the backend server ;
 
-    if (shape == "rect") {
+    if (tool == "rectangle") {
       existingShape.push({
         type: "rect",
         startX: startX,
@@ -78,7 +81,7 @@ export const drawShape = (
         width: width,
         height: height,
       });
-    } else if (shape == "arc") {
+    } else if (tool == "ellipse") {
       const radius = Math.sqrt(width ** 2 + height ** 2);
       existingShape.push({
         type: "arc",
@@ -86,7 +89,7 @@ export const drawShape = (
         startY: startY,
         radius: radius,
       });
-    } else if (shape == "line") {
+    } else if (tool == "line") {
       existingShape.push({
         type: "line",
         startX: startX,
@@ -94,7 +97,7 @@ export const drawShape = (
         moveX: event.clientX - rect.left,
         moveY: event.clientY - rect.top,
       });
-    } else if (shape == "pencil") {
+    } else if (tool == "pencil") {
       existingShape.push({
         type: "pencil",
         path: pencilPath,
@@ -114,22 +117,22 @@ export const drawShape = (
 
       drawShapesBeforeClear(ctx, canvas, existingShape);
 
-      if (shape == "rect") {
+      if (tool == "rectangle") {
         ctx.strokeStyle = "black";
         ctx.strokeRect(startX, startY, width, height);
-      } else if (shape == "arc") {
+      } else if (tool == "ellipse") {
         const radius = Math.sqrt(width ** 2 + height ** 2);
         ctx.beginPath();
         ctx.strokeStyle = "black";
         ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
         ctx.stroke();
-      } else if (shape == "line") {
+      } else if (tool == "line") {
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
         ctx.strokeStyle = "black";
         ctx.stroke();
-      } else {
+      } else if (tool == "pencil") {
         const currentX = event.clientX - rect.left;
         const currentY = event.clientY - rect.top;
         pencilPath.push({ x: currentX, y: currentY });
@@ -147,6 +150,8 @@ export const drawShape = (
           }
         }
         ctx.stroke();
+      } else {
+        console.log(`We are working to create ${tool} tool`);
       }
     }
   });
