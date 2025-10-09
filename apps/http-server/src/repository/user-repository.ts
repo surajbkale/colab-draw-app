@@ -1,68 +1,52 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { prismaClient } from "@repo/db/prismaClient";
 
 class UserRepository {
   constructor() {}
 
   async SignUp(data: any) {
     try {
-      // const hashedPassword = bcrypt.hashSync(data.password, 10);
-      // const user = await prismaClient.user.create({ data: { name: data.name, email: data.email, password: hashedPassword } });
-      // const jwtToken = jwt.sign({ id: user.id }, JWT_SECRET);
-      // console.log("token", jwtToken);
-      // console.log("User", user);
-      // return {user, jwtToken};
-      return "sign up success";
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      const user = await prismaClient.user.create({
+        data: {
+          name: data.name,
+          email: data.email,
+          password: hashedPassword,
+        },
+      });
+      const jwtToken = jwt.sign({ id: user.id }, "mysecret");
+      console.log(`token: ${jwtToken}`);
+      console.log(`User: ${user}`);
+      return { user, token: jwtToken };
     } catch (error) {
-      console.log("Eoor has occured at user controller");
+      throw new Error("Error signing up user");
       throw error;
     }
   }
 
   async SignIn(data: any) {
     try {
-      // const user = await prismaClient.user.findUnique({where:{email: data.email}});
-      // if(!user){
-      //     throw new NotFoundError("User is not find in database");
-      // }
-      // const isMatchpassword = bcrypt.compareSync(data.password, user.password);
-      // if(!isMatchpassword){
-      //     throw new UnauthorizedError("Password does't matched");
-      // }
-      // const jwtToken = jwt.sign({ id: user?.id }, JWT_SECRET);
-      // console.log("token", jwtToken);
-      // console.log("User", user);
-      // return  {user, jwtToken};
-      return "sign in success";
+      const user = await prismaClient.user.findUnique({
+        where: { email: data.email },
+      });
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const isMatchedPassword = await bcrypt.compare(
+        data.password,
+        user.password
+      );
+      if (!isMatchedPassword) {
+        throw new Error("Invalid password");
+      }
+      const jwtToken = jwt.sign({ id: user?.id }, "mysecret");
+      return jwtToken;
     } catch (error) {
-      console.log("Eoor has occured at repository controller");
+      console.log(`Error has occurred while signing in: ${error}`);
       throw error;
     }
   }
-
-  // async JoinRoom(token:any, slug:any){
-  //     try {
-  //        const user = jwt.verify(token, JWT_SECRET)
-  //        if(!user) return;
-  //        const parsedData = new URLSearchParams(user);
-  //        const useId:Number = Number(parsedData.get('id'));
-  //        const response = await prismaClient.room.create({data:{slug: slug, adminid:Number(useId)}});
-  //        return response;
-  //     } catch (error) {
-  //        console.log("Eoor has occured at repository controller");
-  //        throw error;
-  //     }
-  // }
-
-  // async GetRoom(){
-  //     try {
-  //        const response = await prismaClient.room.findMany();
-  //        return response;
-  //     } catch (error) {
-  //        console.log("Eoor has occured at repository controller");
-  //        throw error;
-  //     }
-  // }
 }
 
 export { UserRepository };
