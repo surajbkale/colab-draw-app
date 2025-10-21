@@ -1,4 +1,5 @@
 import { Tool } from "../hooks/useDraw";
+import { Color, Size, Stroke } from "../hooks/useDraw";
 
 interface Pencil {
   x: number;
@@ -36,6 +37,8 @@ const existingShape: ExistingShape[] = [];
 export const drawShape = (
   canvas: HTMLCanvasElement,
   tool: Tool,
+  color: Color,
+  stroke: Stroke,
   socket: WebSocket
 ) => {
   const ctx = canvas.getContext("2d");
@@ -118,19 +121,20 @@ export const drawShape = (
       drawShapesBeforeClear(ctx, canvas, existingShape);
 
       if (tool == "rectangle") {
-        ctx.strokeStyle = "black";
+        ctx.lineWidth = stroke;
+        ctx.strokeStyle = color;
         ctx.strokeRect(startX, startY, width, height);
       } else if (tool == "ellipse") {
         const radius = Math.sqrt(width ** 2 + height ** 2);
         ctx.beginPath();
-        ctx.strokeStyle = "black";
+        ctx.strokeStyle = color;
         ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
         ctx.stroke();
       } else if (tool == "line") {
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
-        ctx.strokeStyle = "black";
+        ctx.strokeStyle = color;
         ctx.stroke();
       } else if (tool == "pencil") {
         const currentX = event.clientX - rect.left;
@@ -138,7 +142,7 @@ export const drawShape = (
         pencilPath.push({ x: currentX, y: currentY });
 
         ctx.beginPath();
-        ctx.strokeStyle = "black";
+        ctx.strokeStyle = color;
 
         for (let i = 1; i < pencilPath.length; i++) {
           const prev = pencilPath[i - 1];

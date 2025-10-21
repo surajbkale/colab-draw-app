@@ -1,5 +1,4 @@
 import {
-  MousePointer2,
   MoveUpRight,
   Pencil,
   Square,
@@ -17,7 +16,7 @@ interface ToolProps {
 
 const Toolbar = ({ setTool }: ToolProps) => {
   const tools = [
-    { id: "select" as Tool, icon: MousePointer2 },
+    // { id: "select" as Tool, icon: MousePointer2 },
     { id: "pencil" as Tool, icon: Pencil },
     { id: "rectangle" as Tool, icon: Square },
     { id: "ellipse" as Tool, icon: Circle },
@@ -29,7 +28,7 @@ const Toolbar = ({ setTool }: ToolProps) => {
   ];
 
   return (
-    <div className="absolute justify-center m-2 bg-white">
+    <div className="absolute m-2 bg-white">
       <div className="border flex flex-col gap-2 px-2 py-2 rounded shadow-lg">
         {tools.map((tool) => {
           const Icon = tool.icon;
