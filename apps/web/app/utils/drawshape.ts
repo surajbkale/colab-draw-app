@@ -122,6 +122,24 @@ export const drawShape = (
         path: pencilPath,
       });
     }
+
+    socket.send(
+      JSON.stringify({
+        type: "rect",
+        color: color,
+        stroke: stroke,
+        startX: startX,
+        startY: startY,
+        width: width,
+        height: height,
+      })
+    );
+
+    socket.onmessage = (event) => {
+      existingShape.push(JSON.parse(event.data));
+      console.log(JSON.parse(event.data));
+      drawShapesBeforeClear(ctx, canvas, existingShape);
+    };
   });
 
   canvas.addEventListener("mousemove", (event: MouseEvent) => {
