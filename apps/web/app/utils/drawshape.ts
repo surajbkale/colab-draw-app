@@ -76,10 +76,10 @@ export const drawShape = (
     const rect = canvas.getBoundingClientRect();
 
     // socket logic to send messages to the backend server
-    console.log(`Hello from my side broh`);
+    // console.log(`Hello from my side broh`);
     socket.send('{ "message" : "checking the server" }');
     socket.onmessage = (event) => {
-      console.log(`Hi there ${event.data}`);
+      console.log(`#333333 ${event.data}`);
     };
 
     // socket logic to send messages to the backend server ;
@@ -219,7 +219,6 @@ const drawShapesBeforeClear = (
         }
       }
       ctx.stroke();
-      console.log(existingShape);
     }
   });
 };
