@@ -1,8 +1,8 @@
 import { Type, Minus } from "lucide-react";
 import { Color, Size, Stroke } from "../app/hooks/useDraw";
 
-interface FilterbarProps {
-  setColor: (color: Color) => void;
+interface FilterProps {
+  setColor: (colirId: Color) => void;
   color: Color;
   setSize: (size: Size) => void;
   size: Size;
@@ -17,7 +17,7 @@ const Filterbar = ({
   setSize,
   stroke,
   setStroke,
-}: FilterbarProps) => {
+}: FilterProps) => {
   const colors = [
     "#001219" as Color,
     "#ed9824" as Color,
@@ -26,13 +26,18 @@ const Filterbar = ({
     "#9158f4" as Color,
     "#3bb273" as Color,
   ];
-  const sizes = [10 as Size, 14 as Size, 18 as Size, 22 as Size, 24 as Size];
+  const sizes = [
+    { id: "S", size: 12 as Size },
+    { id: "M", size: 16 as Size },
+    { id: "L", size: 20 as Size },
+    { id: "XL", size: 24 as Size },
+  ];
   const strokes = [
-    1 as Stroke,
-    2 as Stroke,
-    3 as Stroke,
-    4 as Stroke,
-    5 as Stroke,
+    { id: "font-light", size: 1 as Stroke },
+    { id: "font-normal", size: 2 as Stroke },
+    { id: "font-semibold", size: 3 as Stroke },
+    { id: "font-bold", size: 4 as Stroke },
+    { id: "font-extrabold", size: 5 as Stroke },
   ];
 
   return (
@@ -61,17 +66,11 @@ const Filterbar = ({
               {strokes.map((stroke) => {
                 return (
                   <button
-                    onClick={() => setStroke(stroke)}
-                    key={stroke}
+                    key={stroke.id}
+                    onClick={() => setStroke(stroke.size)}
                     className={`p-1 rounded transition-all duration-500 cursor-pointer bg-gray-200 `}
                   >
-                    <Minus
-                      style={{
-                        width: `${stroke * 6}px`,
-                        height: `${stroke * 6}px`,
-                      }}
-                      className="w-6 h-6 transition-all duration-500 text-gray-700 "
-                    />
+                    <span className={`text-gray-700 ${stroke.id}`}>---</span>
                   </button>
                 );
               })}
@@ -84,14 +83,11 @@ const Filterbar = ({
               {sizes.map((size) => {
                 return (
                   <button
-                    onClick={() => setSize(size)}
-                    key={size}
-                    className={`p-1 rounded transition-all duration-500 cursor-pointer bg-gray-200 `}
+                    onClick={() => setSize(size.size)}
+                    key={size.id}
+                    className={`h-4 w-4 rounded bg-gray-300 flex justify-center items-center p-3 text-gray-700`}
                   >
-                    <Type
-                      style={{ width: `${size}px`, height: `${size}px` }}
-                      className="w-6 h-6 transition-all duration-500 text-gray-700 "
-                    />
+                    {size.id}
                   </button>
                 );
               })}
@@ -104,3 +100,17 @@ const Filterbar = ({
 };
 
 export default Filterbar;
+
+{
+  /* <div className="flex flex-col justify-center gap-1">
+                        <p className="text-xs text-gray-700">Background</p>
+                        <div className="flex flex-wrap gap-2">
+                            <div className="h-5 w-5 bg-gray-600 rounded cursor-pointer"></div>
+                            <div className="h-5 w-5 bg-red-300 rounded cursor-pointer"></div>
+                            <div className="h-5 w-5 bg-green-300 rounded cursor-pointer"></div>
+                            <div className="h-5 w-5 bg-orange-300 rounded cursor-pointer"></div>
+                            <div className="h-5 w-5 bg-pink-300 rounded cursor-pointer"></div>
+                            <div className="h-5 w-5 bg-purple-300 rounded cursor-pointer"></div>
+                        </div>
+                    </div> */
+}
