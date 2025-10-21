@@ -9,6 +9,8 @@ interface Pencil {
 type ExistingShape =
   | {
       type: "rect";
+      color: string;
+      stroke: number;
       startX: number;
       startY: number;
       width: number;
@@ -16,12 +18,16 @@ type ExistingShape =
     }
   | {
       type: "arc";
+      color: string;
+      stroke: number;
       startX: number;
       startY: number;
       radius: number;
     }
   | {
       type: "line";
+      color: string;
+      stroke: number;
       startX: number;
       startY: number;
       moveX: number;
@@ -29,6 +35,8 @@ type ExistingShape =
     }
   | {
       type: "pencil";
+      color: string;
+      stroke: number;
       path: Pencil[];
     };
 
@@ -79,6 +87,8 @@ export const drawShape = (
     if (tool == "rectangle") {
       existingShape.push({
         type: "rect",
+        color: color,
+        stroke: stroke,
         startX: startX,
         startY: startY,
         width: width,
@@ -88,6 +98,8 @@ export const drawShape = (
       const radius = Math.sqrt(width ** 2 + height ** 2);
       existingShape.push({
         type: "arc",
+        color: color,
+        stroke: stroke,
         startX: startX,
         startY: startY,
         radius: radius,
@@ -95,6 +107,8 @@ export const drawShape = (
     } else if (tool == "line") {
       existingShape.push({
         type: "line",
+        color: color,
+        stroke: stroke,
         startX: startX,
         startY: startY,
         moveX: event.clientX - rect.left,
@@ -103,6 +117,8 @@ export const drawShape = (
     } else if (tool == "pencil") {
       existingShape.push({
         type: "pencil",
+        color: color,
+        stroke: stroke,
         path: pencilPath,
       });
     }
@@ -127,11 +143,15 @@ export const drawShape = (
       } else if (tool == "ellipse") {
         const radius = Math.sqrt(width ** 2 + height ** 2);
         ctx.beginPath();
+        ctx.lineWidth = stroke;
+        ctx.strokeStyle = color;
         ctx.strokeStyle = color;
         ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
         ctx.stroke();
       } else if (tool == "line") {
         ctx.beginPath();
+        ctx.lineWidth = stroke;
+        ctx.strokeStyle = color;
         ctx.moveTo(startX, startY);
         ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
         ctx.strokeStyle = color;
@@ -142,7 +162,6 @@ export const drawShape = (
         pencilPath.push({ x: currentX, y: currentY });
 
         ctx.beginPath();
-        ctx.strokeStyle = color;
 
         for (let i = 1; i < pencilPath.length; i++) {
           const prev = pencilPath[i - 1];
@@ -150,7 +169,8 @@ export const drawShape = (
           if (prev !== undefined && curr !== undefined) {
             ctx.moveTo(prev.x, prev.y);
             ctx.lineTo(curr.x, curr.y);
-            console.log("#33");
+            ctx.lineWidth = stroke;
+            ctx.strokeStyle = color;
           }
         }
         ctx.stroke();
@@ -166,24 +186,29 @@ const drawShapesBeforeClear = (
   canvas: HTMLCanvasElement,
   existingShape: ExistingShape[]
 ) => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // ctx.fillStyle = "rgb(255, 255, 255)"
+  // ctx.fillRect = (0, 0, canvas.width, canvas.height)
   existingShape.map((shape: ExistingShape) => {
     if (shape.type == "rect") {
-      ctx.strokeStyle = "black";
       ctx.strokeRect(shape.startX, shape.startY, shape.width, shape.height);
     } else if (shape.type == "arc") {
       ctx.beginPath();
       ctx.arc(shape.startX, shape.startY, shape.radius, 0, 2 * Math.PI); // Circle centered at (100, 100) with radius 50
-      ctx.strokeStyle = "black";
+      ctx.strokeStyle = shape.color;
+      ctx.lineWidth = shape.stroke;
       ctx.stroke();
     } else if (shape.type == "line") {
       ctx.beginPath();
       ctx.moveTo(shape.startX, shape.startY);
       ctx.lineTo(shape.moveX, shape.moveY);
-      ctx.strokeStyle = "black";
+      ctx.strokeStyle = shape.color;
+      ctx.lineWidth = shape.stroke;
       ctx.stroke();
     } else {
       ctx.beginPath();
-      ctx.strokeStyle = "black";
+      ctx.strokeStyle = shape.color;
+      ctx.lineWidth = shape.stroke;
 
       for (let i = 1; i < shape.path.length; i++) {
         const prev = shape.path[i - 1];
