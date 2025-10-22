@@ -8,7 +8,7 @@ interface Pencil {
 
 type ExistingShape =
   | {
-      type: "rect";
+      type: "rectangle";
       color: string;
       stroke: number;
       startX: number;
@@ -17,7 +17,7 @@ type ExistingShape =
       height: number;
     }
   | {
-      type: "arc";
+      type: "ellipse";
       color: string;
       stroke: number;
       startX: number;
@@ -37,7 +37,7 @@ type ExistingShape =
       type: "pencil";
       color: string;
       stroke: number;
-      path: Pencil[];
+      path: any;
     };
 
 const existingShape: ExistingShape[] = [];
@@ -52,9 +52,9 @@ export const drawShape = (
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  console.log(`Selected tool is ${tool}`);
-  // ctx.fillStyle = "rgb(255, 255, 255)";
-  // ctx.fillRect(0, 0, canvas.width, canvas.height);
+  console.log("selected tool is", tool);
+  // ctx.fillStyle= "rgb(255, 255, 255)"
+  // ctx.fillRect(0,0,canvas.width, canvas.height);
 
   let startX: number = 0;
   let startY: number = 0;
@@ -75,37 +75,30 @@ export const drawShape = (
     pencilPath = [];
     const rect = canvas.getBoundingClientRect();
 
-    // socket logic to send messages to the backend server
-    // console.log(`Hello from my side broh`);
-    socket.send('{ "message" : "checking the server" }');
-    socket.onmessage = (event) => {
-      console.log(`#333333 ${event.data}`);
-    };
-
-    // socket logic to send messages to the backend server ;
+    let shape: ExistingShape | null = null;
 
     if (tool == "rectangle") {
-      existingShape.push({
-        type: "rect",
+      shape = {
+        type: "rectangle",
         color: color,
         stroke: stroke,
         startX: startX,
         startY: startY,
         width: width,
         height: height,
-      });
+      };
     } else if (tool == "ellipse") {
       const radius = Math.sqrt(width ** 2 + height ** 2);
-      existingShape.push({
-        type: "arc",
+      shape = {
+        type: "ellipse",
         color: color,
         stroke: stroke,
         startX: startX,
         startY: startY,
         radius: radius,
-      });
+      };
     } else if (tool == "line") {
-      existingShape.push({
+      shape = {
         type: "line",
         color: color,
         stroke: stroke,
@@ -113,33 +106,25 @@ export const drawShape = (
         startY: startY,
         moveX: event.clientX - rect.left,
         moveY: event.clientY - rect.top,
-      });
+      };
     } else if (tool == "pencil") {
-      existingShape.push({
+      shape = {
         type: "pencil",
         color: color,
         stroke: stroke,
         path: pencilPath,
-      });
+      };
     }
 
-    socket.send(
-      JSON.stringify({
-        type: "rect",
-        color: color,
-        stroke: stroke,
-        startX: startX,
-        startY: startY,
-        width: width,
-        height: height,
-      })
-    );
+    if (!shape) return;
+    existingShape.push(shape);
 
-    socket.onmessage = (event) => {
-      existingShape.push(JSON.parse(event.data));
-      console.log(JSON.parse(event.data));
-      drawShapesBeforeClear(ctx, canvas, existingShape);
-    };
+    // socket.send(JSON.stringify({type:"rect", color:color, stroke: stroke, startX:startX, startY: startY, width: width, height: height }));
+    // socket.onmessage=(event)=>{
+    //     existingShape.push(JSON.parse(event.data));
+    //     console.log(JSON.parse(event.data));
+    //     drawShapesBeforeClear(ctx, canvas, existingShape);
+    // }
   });
 
   canvas.addEventListener("mousemove", (event: MouseEvent) => {
@@ -149,8 +134,8 @@ export const drawShape = (
       height = event.clientY - startY - rect.top;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // ctx.fillStyle = "rgb(255, 255, 255)";
-      // ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // ctx.fillStyle= "rgb(255, 255, 255)"
+      // ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       drawShapesBeforeClear(ctx, canvas, existingShape);
 
@@ -163,15 +148,14 @@ export const drawShape = (
         ctx.beginPath();
         ctx.lineWidth = stroke;
         ctx.strokeStyle = color;
-        ctx.strokeStyle = color;
         ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
         ctx.stroke();
+        ctx.closePath();
       } else if (tool == "line") {
         ctx.beginPath();
-        ctx.lineWidth = stroke;
-        ctx.strokeStyle = color;
         ctx.moveTo(startX, startY);
         ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
+        ctx.lineWidth = stroke;
         ctx.strokeStyle = color;
         ctx.stroke();
       } else if (tool == "pencil") {
@@ -182,18 +166,14 @@ export const drawShape = (
         ctx.beginPath();
 
         for (let i = 1; i < pencilPath.length; i++) {
-          const prev = pencilPath[i - 1];
-          const curr = pencilPath[i];
-          if (prev !== undefined && curr !== undefined) {
-            ctx.moveTo(prev.x, prev.y);
-            ctx.lineTo(curr.x, curr.y);
-            ctx.lineWidth = stroke;
-            ctx.strokeStyle = color;
-          }
+          ctx.moveTo(pencilPath[i - 1].x, pencilPath[i - 1].y);
+          ctx.lineTo(pencilPath[i].x, pencilPath[i].y);
+          ctx.lineWidth = stroke;
+          ctx.strokeStyle = color;
         }
         ctx.stroke();
       } else {
-        console.log(`We are working to create ${tool} tool`);
+        console.log(`We are workign to crete ${tool} tool also`);
       }
     }
   });
@@ -205,12 +185,14 @@ const drawShapesBeforeClear = (
   existingShape: ExistingShape[]
 ) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // ctx.fillStyle = "rgb(255, 255, 255)"
-  // ctx.fillRect = (0, 0, canvas.width, canvas.height)
+  // ctx.fillStyle= "rgb(255, 255, 255)"
+  // ctx.fillRect(0, 0, canvas.width, canvas.height)
   existingShape.map((shape: ExistingShape) => {
-    if (shape.type == "rect") {
+    if (shape.type == "rectangle") {
+      ctx.strokeStyle = shape.color;
+      ctx.lineWidth = shape.stroke;
       ctx.strokeRect(shape.startX, shape.startY, shape.width, shape.height);
-    } else if (shape.type == "arc") {
+    } else if (shape.type == "ellipse") {
       ctx.beginPath();
       ctx.arc(shape.startX, shape.startY, shape.radius, 0, 2 * Math.PI); // Circle centered at (100, 100) with radius 50
       ctx.strokeStyle = shape.color;
@@ -229,12 +211,8 @@ const drawShapesBeforeClear = (
       ctx.lineWidth = shape.stroke;
 
       for (let i = 1; i < shape.path.length; i++) {
-        const prev = shape.path[i - 1];
-        const curr = shape.path[i];
-        if (prev !== undefined && curr !== undefined) {
-          ctx.moveTo(prev.x, prev.y);
-          ctx.lineTo(curr.x, curr.y);
-        }
+        ctx.moveTo(shape.path[i - 1].x, shape.path[i - 1].y);
+        ctx.lineTo(shape.path[i].x, shape.path[i].y);
       }
       ctx.stroke();
     }
