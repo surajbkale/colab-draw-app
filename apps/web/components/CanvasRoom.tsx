@@ -9,7 +9,7 @@ const CanvasRoom = (roomid: { roomId: string }) => {
 
   return (
     <div>
-      <Canvas socket={socket} />
+      <Canvas socket={socket} roomid={roomid.roomId} />
     </div>
   );
 };

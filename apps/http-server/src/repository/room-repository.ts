@@ -24,6 +24,18 @@ class RoomRepository {
       throw error;
     }
   }
+
+  async GetRoomBySlug(slug: string) {
+    try {
+      const response = await prismaClient.room.findFirst({
+        where: { slug: slug },
+      });
+      return response;
+    } catch (error) {
+      console.log("Eoor has occured at repository controller");
+      throw error;
+    }
+  }
 }
 
 export { RoomRepository };

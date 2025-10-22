@@ -83,7 +83,13 @@ wss.on("connection", (ws: WebSocket, req: Request) => {
 
     // dump messages in chat tableesss
 
-    // await prismaClient.chat.create({data:{message: JSON.stringify(data), senderid: userData.id, roomid: room.id}})
+    await prismaClient.chat.create({
+      data: {
+        message: JSON.stringify(data),
+        senderid: userData.id,
+        roomid: room.id,
+      },
+    });
 
     users.forEach((user) => {
       if (user.rooms.includes(slug)) {

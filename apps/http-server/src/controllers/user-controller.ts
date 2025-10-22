@@ -1,37 +1,53 @@
-import { UserServices } from "../services";
-import { Request, Response } from "express";
+import { prismaClient } from "@repo/db/prismaClient";
+import { RoomServices } from "../services/room-service";
+const roomServices = new RoomServices();
 
-const userServices = new UserServices();
-
-export const SignUp = async (req: Request, res: Response) => {
+export const CreateRoom = async (req: any, res: any) => {
   try {
-    console.log(`Luke warm water`);
     const data = req.body;
-    const user = await userServices.SignUp(data);
+    const token = req.headers.token;
+
+    const response = await roomServices.CreateRoom(data.slug, token);
     res.status(200).json({
-      message: "User signed up successfully",
-      token: user,
+      message: "Room created successfully",
+      response: response,
+      success: true,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Can't Signup",
+    res.status(400).json({
+      message: "Room can't created successfully",
       err: error,
     });
   }
 };
 
-export const SignIn = async (req: Request, res: Response) => {
+export const GetRooms = async (req: any, res: any) => {
   try {
-    const data = req.body;
-    const user = await userServices.SignIn(data);
+    const response = await roomServices.GetRooms();
     res.status(200).json({
-      message: "User Signed in successfully",
-      token: user,
+      message: "All room finded successfully",
+      response: response,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Internal Server Error",
-      error,
+    res.status(400).json({
+      message: "Room can't find successfully",
+      err: error,
+    });
+  }
+};
+
+export const GetRoomBySlug = async (req: any, res: any) => {
+  try {
+    const slug = req.query.slug;
+    const response = await roomServices.GetRoomBySlug(slug);
+    res.status(200).json({
+      message: "All room finded successfully",
+      response: response,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Room can't find successfully",
+      err: error,
     });
   }
 };
