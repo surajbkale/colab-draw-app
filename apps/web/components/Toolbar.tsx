@@ -1,12 +1,13 @@
 import {
-  MoveUpRight,
   Pencil,
   Square,
   Circle,
+  MoveUpRight,
   Type,
   Eraser,
   Undo2,
   Redo2,
+  Minus,
 } from "lucide-react";
 import { Tool } from "../app/hooks/useDraw";
 
@@ -20,7 +21,8 @@ const Toolbar = ({ setTool }: ToolProps) => {
     { id: "pencil" as Tool, icon: Pencil },
     { id: "rectangle" as Tool, icon: Square },
     { id: "ellipse" as Tool, icon: Circle },
-    { id: "line" as Tool, icon: MoveUpRight },
+    { id: "line" as Tool, icon: Minus },
+    { id: "arrow" as Tool, icon: MoveUpRight },
     { id: "text" as Tool, icon: Type },
     { id: "eraser" as Tool, icon: Eraser },
     { id: "undo" as Tool, icon: Undo2 },
@@ -36,10 +38,10 @@ const Toolbar = ({ setTool }: ToolProps) => {
             <button
               onClick={() => setTool(tool.id)}
               key={tool.id}
-              className={`p-2 rounded transition-all duration-500 cursor-pointer bg-gray-100`}
+              className={`p-2 rounded transition-all duration-500 cursor-pointer bg-gray-200 `}
             >
               <Icon
-                className={`w-5 h-5 transition-all duration-500 text-gray-700`}
+                className={`w-4 h-4 transition-all duration-500 text-gray-700`}
               />
             </button>
           );

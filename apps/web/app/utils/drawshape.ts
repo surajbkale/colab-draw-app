@@ -39,6 +39,15 @@ type ExistingShape =
       color: string;
       stroke: number;
       path: any;
+    }
+  | {
+      type: "arrow";
+      color: string;
+      stroke: number;
+      startX: number;
+      startY: number;
+      moveX: number;
+      moveY: number;
     };
 
 export const drawShape = async (
@@ -48,13 +57,12 @@ export const drawShape = async (
 ) => {
   const ctx = canvas.getContext("2d");
 
+  //  response from the database
   const existingShape: ExistingShape[] = await getShapes(roomid);
 
   if (!ctx) return;
 
   drawShapesBeforeClear(ctx, canvas, existingShape);
-
-  //  response fro the database
 
   // ctx.fillStyle= "rgb(255, 255, 255)"
   // ctx.fillRect(0,0,canvas.width, canvas.height);
@@ -70,6 +78,7 @@ export const drawShape = async (
     clicked = true;
     //@ts-ignore
     tool = window.currentSelectedTool;
+
     const rect = canvas.getBoundingClientRect();
     startX = event.clientX - rect.left;
     startY = event.clientY - rect.top;
@@ -117,6 +126,16 @@ export const drawShape = async (
       };
     } else if (tool == "pencil") {
       shape = { type: "pencil", color: "black", stroke: 1, path: pencilPath };
+    } else if (tool == "arrow") {
+      shape = {
+        type: "arrow",
+        color: "black",
+        stroke: 1,
+        startX: startX,
+        startY: startY,
+        moveX: event.clientX - rect.left,
+        moveY: event.clientY - rect.top,
+      };
     }
 
     if (!shape) return;
@@ -166,6 +185,33 @@ export const drawShape = async (
         ctx.strokeStyle = "black";
         ctx.stroke();
         ctx.closePath();
+      } else if (tool == "arrow") {
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "black";
+        ctx.stroke();
+        ctx.closePath();
+
+        var arrowLen = 10;
+        var dx = event.clientX - rect.left - startX;
+        var dy = event.clientY - rect.top - startY;
+        var angle = Math.atan2(dy, dx);
+
+        ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
+        ctx.lineTo(
+          event.clientX - rect.left - arrowLen * Math.cos(angle - Math.PI / 6),
+          event.clientY - rect.top - arrowLen * Math.sin(angle - Math.PI / 6)
+        );
+        ctx.stroke();
+
+        ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
+        ctx.lineTo(
+          event.clientX - rect.left - arrowLen * Math.cos(angle + Math.PI / 6),
+          event.clientY - rect.top - arrowLen * Math.sin(angle + Math.PI / 6)
+        );
+        ctx.stroke();
       } else if (tool == "pencil") {
         const currentX = event.clientX - rect.left;
         const currentY = event.clientY - rect.top;
@@ -215,7 +261,7 @@ const drawShapesBeforeClear = (
       ctx.lineWidth = shape.stroke;
       ctx.stroke();
       ctx.closePath();
-    } else {
+    } else if (shape.type == "pencil") {
       ctx.beginPath();
       // ctx.strokeStyle= shape.color;
       ctx.lineWidth = shape.stroke;
@@ -226,6 +272,33 @@ const drawShapesBeforeClear = (
       }
       ctx.stroke();
       ctx.closePath();
+    } else if (shape.type == "arrow") {
+      ctx.beginPath();
+      ctx.moveTo(shape.startX, shape.startY);
+      ctx.lineTo(shape.moveX, shape.moveY);
+      // ctx.strokeStyle= shape.color;
+      ctx.lineWidth = shape.stroke;
+      ctx.stroke();
+      ctx.closePath();
+
+      let arrowLen = 10;
+      var dx = shape.moveX - shape.startX;
+      var dy = shape.moveY - shape.startY;
+      var angle = Math.atan2(dy, dx);
+
+      ctx.moveTo(shape.moveX, shape.moveY);
+      ctx.lineTo(
+        shape.moveX - arrowLen * Math.cos(angle - Math.PI / 6),
+        shape.moveY - arrowLen * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.stroke();
+
+      ctx.moveTo(shape.moveX, shape.moveY);
+      ctx.lineTo(
+        shape.moveX - arrowLen * Math.cos(angle + Math.PI / 6),
+        shape.moveY - arrowLen * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.stroke();
     }
   });
 };
