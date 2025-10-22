@@ -1,6 +1,6 @@
-import { Color, Stroke, Tool } from "../hooks/useDraw";
 import { HTTP_BACKEND_URL } from "@repo/common/HTTP_BACKEND_URL";
 import axios from "axios";
+import { useEffect } from "react";
 
 interface Pencil {
   x: number;
@@ -58,7 +58,7 @@ type ExistingShape =
       text: string;
     };
 
-const existingShape: ExistingShape[] = [];
+let existingShape: ExistingShape[] = [];
 
 export const drawShape = async (
   canvas: HTMLCanvasElement,
@@ -70,6 +70,10 @@ export const drawShape = async (
 ) => {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
+
+  const previousShapes = await getShapes(roomid);
+  existingShape = previousShapes;
+  drawShapesBeforeClear(ctx, canvas, existingShape);
 
   let startX = 0;
   let startY = 0;
@@ -252,6 +256,7 @@ const drawShapesBeforeClear = (
     } else if (shape.type == "ellipse") {
       ctx.beginPath();
       ctx.arc(shape.startX, shape.startY, shape.radius, 0, 2 * Math.PI); // Circle centered at (100, 100) with radius 50
+      ctx.lineWidth = shape.stroke;
       ctx.stroke();
       ctx.closePath();
     } else if (shape.type == "line") {
@@ -308,7 +313,6 @@ const getShapes = async (roomid: any) => {
   );
   if (!chats) return;
   const parsedChat = chats.data.chats.map((data: any) => {
-    console.log("Hiiii", data.message);
     return JSON.parse(data.message);
   });
   return parsedChat;
