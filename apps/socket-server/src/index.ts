@@ -1,5 +1,6 @@
 import { WebSocketServer, WebSocket } from "ws";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { prismaClient } from "@repo/db/prismaClient";
 
 const wss = new WebSocketServer({ port: 8100 });
 
@@ -73,12 +74,27 @@ wss.on("connection", (ws: WebSocket, req: Request) => {
   //    rooms: [],
   //  });
 
-  ws.on("message", (message: any) => {
+  ws.on("message", async (message: any) => {
     const data = JSON.parse(message.toString());
-    console.log("Message received from cient");
+
+    // find the roomid based upon slug in url
+    const room = await prismaClient.room.findFirst({ where: { slug: slug } });
+    if (!room) return;
+
+    // dump messages in chat tableesss
+
+    await prismaClient.chat.create({
+      data: {
+        message: JSON.stringify(data),
+        senderid: userData.id,
+        roomid: room.id,
+      },
+    });
 
     users.forEach((user) => {
-      user.ws.send(JSON.stringify(data));
+      if (user.rooms.includes(slug)) {
+        user.ws.send(JSON.stringify(data));
+      }
     });
   });
 });
