@@ -1,5 +1,4 @@
-import { Tool } from "../hooks/useDraw";
-import { Color, Size, Stroke } from "../hooks/useDraw";
+import { Color, Stroke, Tool } from "../hooks/useDraw";
 
 interface Pencil {
   x: number;
@@ -119,12 +118,12 @@ export const drawShape = (
     if (!shape) return;
     existingShape.push(shape);
 
-    // socket.send(JSON.stringify({type:"rect", color:color, stroke: stroke, startX:startX, startY: startY, width: width, height: height }));
-    // socket.onmessage=(event)=>{
-    //     existingShape.push(JSON.parse(event.data));
-    //     console.log(JSON.parse(event.data));
-    //     drawShapesBeforeClear(ctx, canvas, existingShape);
-    // }
+    socket.send(JSON.stringify(shape));
+    socket.onmessage = (event) => {
+      existingShape.push(JSON.parse(event.data));
+      console.log(JSON.parse(event.data));
+      drawShapesBeforeClear(ctx, canvas, existingShape);
+    };
   });
 
   canvas.addEventListener("mousemove", (event: MouseEvent) => {
