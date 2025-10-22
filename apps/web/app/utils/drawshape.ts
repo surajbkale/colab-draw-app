@@ -118,10 +118,13 @@ export const drawShape = (
     if (!shape) return;
     existingShape.push(shape);
 
+    // previously sended data from client
+    // JSON.stringify(shape)
+
     socket.send(JSON.stringify(shape));
     socket.onmessage = (event) => {
       existingShape.push(JSON.parse(event.data));
-      console.log(JSON.parse(event.data));
+      console.log(event.data);
       drawShapesBeforeClear(ctx, canvas, existingShape);
     };
   });
