@@ -6,11 +6,11 @@ export type Tool =
   | "rectangle"
   | "ellipse"
   | "line"
+  | "arrow"
   | "text"
   | "eraser"
   | "undo"
   | "redo";
-
 export type Color =
   | "#001219"
   | "#ed9824"
@@ -18,10 +18,8 @@ export type Color =
   | "#ff0080"
   | "#9158f4"
   | "#3bb273";
-
 export type Size = 10 | 14 | 18 | 22 | 24;
-
-export type Stroke = 1 | 2 | 3 | 4 | 5;
+export type Stroke = 1 | 2 | 2 | 4 | 5;
 
 export const useDraw = () => {
   const [tool, setTool] = useState<Tool>("rectangle");

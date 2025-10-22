@@ -4,6 +4,12 @@ import React, { useEffect, useRef, useState } from "react";
 import Toolbar from "./Toolbar";
 import { useDraw } from "../app/hooks/useDraw";
 import Filterbar from "./Filterbar";
+import TextTool from "./TextTool";
+
+interface CordsType {
+  x: number;
+  y: number;
+}
 
 const Canvas = ({ socket, roomid }: { socket: WebSocket; roomid: any }) => {
   const {
@@ -19,18 +25,19 @@ const Canvas = ({ socket, roomid }: { socket: WebSocket; roomid: any }) => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
-    //@ts-ignore
-    window.currentSelectedTool = tool;
-    console.log("tool", tool);
-  }, [tool]);
+  // useEffect(() => {
+  //     //@ts-ignore
+  //     window.currentSelectedTool = tool;
+  //     console.log("tool", tool);
+  // }, [tool]);
 
   useEffect(() => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
-      drawShape(canvas, socket, roomid);
+      drawShape(canvas, socket, roomid, tool, color, stroke);
     }
-  }, [canvasRef, color, stroke]);
+    return () => {};
+  }, [canvasRef, color, stroke, tool]);
 
   return (
     <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
@@ -43,7 +50,7 @@ const Canvas = ({ socket, roomid }: { socket: WebSocket; roomid: any }) => {
         stroke={stroke}
         setStroke={changeStroke}
       />
-
+      <h1>Tool name {tool}</h1>
       <canvas
         ref={canvasRef}
         height={580}
