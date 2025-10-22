@@ -5,19 +5,20 @@ const userServices = new UserServices();
 
 export const SignUp = async (req: Request, res: Response) => {
   try {
+    console.log(`Luke warm water`);
     const data = req.body;
     const user = await userServices.SignUp(data);
     res.status(200).json({
       message: "User signed up successfully",
-      user,
-    })
+      token: user,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Can't Signup",
-      err: error
-    })
+      err: error,
+    });
   }
-}
+};
 
 export const SignIn = async (req: Request, res: Response) => {
   try {
@@ -25,12 +26,12 @@ export const SignIn = async (req: Request, res: Response) => {
     const user = await userServices.SignIn(data);
     res.status(200).json({
       message: "User Signed in successfully",
-      user,
-    })
+      token: user,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Internal Server Error",
-      error
-    })
+      error,
+    });
   }
-}
+};

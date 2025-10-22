@@ -1,6 +1,4 @@
 import { SignUp, SignIn } from "./user-controller";
+import { CreateRoom, GetRooms } from "./room-controller";
 
-export {
-  SignUp,
-  SignIn,
-}
+export { SignUp, SignIn, CreateRoom, GetRooms };

@@ -34,6 +34,14 @@ const handleMessages = (users: User[], data: Message, ws: WebSocket) => {
   }
 };
 
+function broadcastMessage(message: any) {
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+}
+
 wss.on("connection", (ws: WebSocket, req) => {
   const urlParams = new URLSearchParams(req?.url?.split("?")[1]);
   const token = urlParams.get("userid");
@@ -54,6 +62,7 @@ wss.on("connection", (ws: WebSocket, req) => {
 
   ws.on("message", (message: string) => {
     const data: Message = JSON.parse(message);
-    handleMessages(users, data, ws);
+    console.log(JSON.stringify(data));
+    broadcastMessage(JSON.stringify(data));
   });
 });

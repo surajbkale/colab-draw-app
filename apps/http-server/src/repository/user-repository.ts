@@ -22,7 +22,7 @@ class UserRepository {
       const jwtToken = jwt.sign({ id: user.id }, "mysecret");
       console.log(`token: ${jwtToken}`);
       console.log(`User: ${user}`);
-      return { user, token: jwtToken };
+      return jwtToken;
     } catch (error) {
       throw new Error("Error signing up user");
       throw error;
