@@ -3,7 +3,7 @@ import Canvas from "./Canvas";
 import useSocket from "../app/hooks/useSocket";
 
 const CanvasRoom = (roomid: { roomId: string }) => {
-  const { loading, socket } = useSocket();
+  const { loading, socket } = useSocket(roomid.roomId);
 
   if (!socket) return <h1 className="text-black">Loading the content...</h1>;
 

@@ -18,10 +18,10 @@ type Message = {
 const users: User[] = [];
 
 const handleMessages = (users: User[], data: Message, ws: WebSocket) => {
-  if (data.type === "join_room") {
-    const user = users.find((user) => user.ws === ws);
+  if (data.type == "join_room") {
+    const user = users.find((user) => user.ws == ws);
     user?.rooms.push(data.room);
-  } else if (data.type === "chat") {
+  } else if (data.type == "chat") {
     users.forEach((user) => {
       if (user.rooms.includes(data.room)) {
         user.ws.send(data.message);
@@ -42,17 +42,17 @@ function broadcastMessage(message: any) {
   });
 }
 
-wss.on("connection", (ws: WebSocket, req) => {
+wss.on("connection", (ws: WebSocket, req: Request) => {
+  console.log("Urlllll with sluggg", req?.url?.split("=")[2]);
+
   const urlParams = new URLSearchParams(req?.url?.split("?")[1]);
   const token = urlParams.get("userid");
-
   if (!token) return;
-
-  const data = jwt.verify(token, "mysecret");
+  const data = jwt.verify(token, "vinodpr");
   if (!data) return;
-
   const parsedData = new URLSearchParams(data);
   const userId = parsedData.get("id");
+  console.log("Iddd is", userId);
 
   users.push({
     userId: Number(userId),
@@ -60,8 +60,8 @@ wss.on("connection", (ws: WebSocket, req) => {
     ws: ws,
   });
 
-  ws.on("message", (message: string) => {
-    const data: Message = JSON.parse(message);
+  ws.on("message", (message: any) => {
+    const data = JSON.parse(message.toString());
     console.log(JSON.stringify(data));
     broadcastMessage(JSON.stringify(data));
   });
