@@ -59,6 +59,7 @@ type ExistingShape =
     };
 
 let existingShape: ExistingShape[] = [];
+let pencilPath: Pencil[] = [];
 
 export const drawShape = async (
   canvas: HTMLCanvasElement,
@@ -79,7 +80,6 @@ export const drawShape = async (
   let startX = 0;
   let startY = 0;
   let clicked = false;
-  let pencilPath: Pencil[] = [];
 
   // Store previous event listeners to remove them properly
   const previousListeners = (canvas as any)._eventListeners || {};
@@ -101,7 +101,6 @@ export const drawShape = async (
 
   const handleMouseUp = (event: MouseEvent) => {
     clicked = false;
-    pencilPath = [];
 
     const rect = canvas.getBoundingClientRect();
     let width = event.clientX - startX - rect.left;
@@ -140,7 +139,9 @@ export const drawShape = async (
         moveY: event.clientY - rect.top,
       };
     } else if (tool === "pencil") {
+      // console.log("pencil path", pencilPath);
       shape = { type: "pencil", color: color, stroke: 1, path: pencilPath };
+      pencilPath = [];
     } else if (tool === "arrow") {
       shape = {
         type: "arrow",
@@ -155,8 +156,8 @@ export const drawShape = async (
 
     if (!shape) return;
     existingShape.push(shape);
-    socket.send(JSON.stringify(shape));
 
+    socket.send(JSON.stringify(shape));
     socket.onmessage = (event) => {
       existingShape.push(JSON.parse(event.data));
       drawShapesBeforeClear(ctx, canvas, existingShape);
@@ -224,11 +225,11 @@ export const drawShape = async (
         }
         ctx.stroke();
       } else if (tool == "eraser") {
-        // change the designing of the cursor
-
         existingShape = existingShape.filter((shape) => {
           return !findInterSection(event.clientX, event.clientY, shape);
         });
+      } else if (tool == "undo") {
+        //   existingShape.pop();
       }
     }
   };
