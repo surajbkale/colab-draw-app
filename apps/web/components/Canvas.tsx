@@ -6,6 +6,8 @@ import { useDraw } from "../app/hooks/useDraw";
 import Filterbar from "./Filterbar";
 import { HTTP_BACKEND_URL } from "@repo/common/HTTP_BACKEND_URL";
 import axios from "axios";
+import "./global.css";
+import CustomCursor from "./CustomCursor";
 
 interface CordsType {
   x: number;
@@ -45,12 +47,12 @@ const Canvas = ({ socket, roomid }: { socket: WebSocket; roomid: any }) => {
         stroke={stroke}
         setStroke={changeStroke}
       />
-      {/* <h1>Tool is {tool}</h1> */}
+      {tool == "eraser" && <CustomCursor />}
       <canvas
         ref={canvasRef}
         height={580}
         width={1280}
-        className={` bg-white bg-[linear-gradient(to_right,#ede4e4_1px,transparent_1px),linear-gradient(to_bottom,#ede4e4_1px,transparent_1px)] bg-[size:6rem_4rem] ${tool == "eraser" ? "cursor-grab" : ""}`}
+        className={` bg-white bg-[linear-gradient(to_right,#ede4e4_1px,transparent_1px),linear-gradient(to_bottom,#ede4e4_1px,transparent_1px)] bg-[size:6rem_4rem]`}
       />
     </div>
   );
