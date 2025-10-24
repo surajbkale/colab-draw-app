@@ -52,7 +52,7 @@ const Filterbar = ({
                     onClick={() => setColor(colorId)}
                     key={colorId}
                     style={{ backgroundColor: colorId }}
-                    className={`h-5 w-5 rounded`}
+                    className={`h-5 w-5 rounded ${colorId == color ? "border-2 border-gray-400" : ""}`}
                   ></button>
                 );
               })}
