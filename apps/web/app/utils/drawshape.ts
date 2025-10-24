@@ -217,7 +217,7 @@ export const drawShape = async (
         existingShape = existingShape.filter((shape) => {
           return !findInterSection(
             event.clientX - rect.left,
-            event.clientY - rect.left,
+            event.clientY - rect.top,
             shape
           );
         });
