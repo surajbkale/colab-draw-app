@@ -1,4 +1,3 @@
-import { Type, Minus } from "lucide-react";
 import { Color, Size, Stroke } from "../app/hooks/useDraw";
 
 interface FilterProps {

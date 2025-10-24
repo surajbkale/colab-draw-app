@@ -77,18 +77,12 @@ wss.on("connection", (ws: WebSocket, req: Request) => {
   ws.on("message", async (message: any) => {
     const data = JSON.parse(message.toString());
 
-    // find the roomid based upon slug in url
-    const room = await prismaClient.room.findFirst({ where: { slug: slug } });
-    if (!room) return;
+    //  find the roomid based upon slug in url
+    //  const room = await prismaClient.room.findFirst({where:{slug:slug}});
+    //  if(!room) return;
 
-    // dump messages in chat tableesss
-    await prismaClient.chat.create({
-      data: {
-        message: JSON.stringify(data),
-        senderid: userData.id,
-        roomid: room.id,
-      },
-    });
+    //  dump messages in chat tableesss
+    // await prismaClient.chat.create({data:{message: JSON.stringify(data), senderid: userData.id, roomid: room.id}})
 
     users.forEach((user) => {
       if (user.rooms.includes(slug)) {
