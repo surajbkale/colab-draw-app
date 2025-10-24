@@ -40,7 +40,7 @@ const Filterbar = ({
   ];
 
   return (
-    <div className="absolute bg-white bottom-0 m-2">
+    <div className="fixed bg-white bottom-0 m-2">
       <div className="border flex flex-col gap-2 px-2 py-1 rounded shadow-lg w-48 h-44">
         <div className="flex flex-col gap-2">
           <div className="flex flex-col justify-center gap-1">
@@ -99,17 +99,3 @@ const Filterbar = ({
 };
 
 export default Filterbar;
-
-{
-  /* <div className="flex flex-col justify-center gap-1">
-                        <p className="text-xs text-gray-700">Background</p>
-                        <div className="flex flex-wrap gap-2">
-                            <div className="h-5 w-5 bg-gray-600 rounded cursor-pointer"></div>
-                            <div className="h-5 w-5 bg-red-300 rounded cursor-pointer"></div>
-                            <div className="h-5 w-5 bg-green-300 rounded cursor-pointer"></div>
-                            <div className="h-5 w-5 bg-orange-300 rounded cursor-pointer"></div>
-                            <div className="h-5 w-5 bg-pink-300 rounded cursor-pointer"></div>
-                            <div className="h-5 w-5 bg-purple-300 rounded cursor-pointer"></div>
-                        </div>
-                    </div> */
-}

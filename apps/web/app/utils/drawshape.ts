@@ -72,11 +72,6 @@ export const drawShape = async (
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  // const previousShapes =await getShapes(roomid);
-  // existingShape = previousShapes;
-  // drawShapesBeforeClear(ctx, canvas, existingShape);
-  // console.log("prevous shapes", existingShape);
-
   let startX = 0;
   let startY = 0;
   let clicked = false;
@@ -101,13 +96,10 @@ export const drawShape = async (
 
   const handleMouseUp = (event: MouseEvent) => {
     clicked = false;
-
     const rect = canvas.getBoundingClientRect();
     let width = event.clientX - startX - rect.left;
     let height = event.clientY - startY - rect.top;
-
     let shape: ExistingShape | null = null;
-
     if (tool === "rectangle") {
       shape = {
         type: "rectangle",
@@ -199,14 +191,12 @@ export const drawShape = async (
         var dx = event.clientX - rect.left - startX;
         var dy = event.clientY - rect.top - startY;
         var angle = Math.atan2(dy, dx);
-
         ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
         ctx.lineTo(
           event.clientX - rect.left - arrowLen * Math.cos(angle - Math.PI / 6),
           event.clientY - rect.top - arrowLen * Math.sin(angle - Math.PI / 6)
         );
         ctx.stroke();
-
         ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
         ctx.lineTo(
           event.clientX - rect.left - arrowLen * Math.cos(angle + Math.PI / 6),
@@ -217,7 +207,6 @@ export const drawShape = async (
         const currentX = event.clientX - rect.left;
         const currentY = event.clientY - rect.top;
         pencilPath.push({ x: currentX, y: currentY });
-
         ctx.beginPath();
         for (let i = 1; i < pencilPath.length; i++) {
           ctx.moveTo(pencilPath[i - 1].x, pencilPath[i - 1].y);
@@ -226,10 +215,12 @@ export const drawShape = async (
         ctx.stroke();
       } else if (tool == "eraser") {
         existingShape = existingShape.filter((shape) => {
-          return !findInterSection(event.clientX, event.clientY, shape);
+          return !findInterSection(
+            event.clientX - rect.left,
+            event.clientY - rect.left,
+            shape
+          );
         });
-      } else if (tool == "undo") {
-        //   existingShape.pop();
       }
     }
   };
@@ -264,15 +255,6 @@ const findInterSection = (x: any, y: any, existingShape: any) => {
         truth = true;
       }
     }
-
-    //  const x1 = existingShape.path[0].x;
-    //  const y1 = existingShape.path[0].y;
-    //  const x2 = existingShape.path[existingShape.path.length-1].x;
-    //  const y2 = existingShape.path[existingShape.path.length-1].y;
-    //  console.log("All path", existingShape.path);
-    //  console.log("x1, y2", x1, y1, x2, y2);
-    // const truth =  x>=Math.min(x1, x2) && x<=Math.max(x1, x2) && y>=Math.min(y1, y2)&& y<=Math.max(y1, y2);
-    // console.log("truth", truth);
 
     return truth;
   }
@@ -314,8 +296,6 @@ const drawShapesBeforeClear = (
   existingShape: ExistingShape[]
 ) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // ctx.fillStyle= "white"
-  // ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   existingShape.map((shape: ExistingShape) => {
     ctx.strokeStyle = shape.color;
