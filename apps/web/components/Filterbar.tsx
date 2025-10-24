@@ -63,14 +63,14 @@ const Filterbar = ({
           <div className="flex flex-col justify-center gap-1">
             <p className="text-xs text-gray-700">Sizes</p>
             <div className="flex flex-wrap gap-2">
-              {strokes.map((stroke) => {
+              {strokes.map((st) => {
                 return (
                   <button
-                    key={stroke.id}
-                    onClick={() => setStroke(stroke.size)}
-                    className={`p-1 rounded transition-all duration-500 cursor-pointer bg-gray-200 `}
+                    key={st.id}
+                    onClick={() => setStroke(st.size)}
+                    className={`${st.size == stroke ? "bg-purple-200" : ""} p-1 rounded transition-all duration-500 cursor-pointer bg-gray-200`}
                   >
-                    <span className={`text-gray-700 ${stroke.id}`}>---</span>
+                    <span className={`text-gray-700 ${st.id}`}>---</span>
                   </button>
                 );
               })}
@@ -80,14 +80,14 @@ const Filterbar = ({
           <div className="flex flex-col justify-center gap-1">
             <p className="text-xs text-gray-700">Sizes</p>
             <div className="flex flex-wrap gap-2">
-              {sizes.map((size) => {
+              {sizes.map((sz) => {
                 return (
                   <button
-                    onClick={() => setSize(size.size)}
-                    key={size.id}
-                    className={`h-4 w-4 rounded bg-gray-300 flex justify-center items-center p-3 text-gray-700`}
+                    onClick={() => setSize(sz.size)}
+                    key={sz.id}
+                    className={`${sz.size == size ? "bg-purple-200" : ""} h-4 w-4 rounded flex justify-center items-center p-3 text-gray-700 transition-all duration-500 cursor-pointer bg-gray-200`}
                   >
-                    {size.id}
+                    {sz.id}
                   </button>
                 );
               })}
