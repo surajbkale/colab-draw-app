@@ -101,6 +101,10 @@ export const drawShape = (
   let TR = false;
   let BL = false;
   let BR = false;
+  let ELR = false;
+  let ELL = false;
+  let ELT = false;
+  let ELB = false;
 
   // Store previous event listeners to remove them properly
   const previousListeners = (canvas as any)._eventListeners || {};
@@ -137,10 +141,6 @@ export const drawShape = (
       if (selectedShape?.type == "rectangle") {
         const zoneX1 = selectedShape.startX;
         const zoneY1 = selectedShape.startY;
-
-        // ctx.beginPath();
-        // ctx.arc(zoneX1, zoneY1, 20, 0, 2 * Math.PI);
-        // ctx.stroke();
 
         const shape1 = {
           id: -1,
@@ -193,6 +193,105 @@ export const drawShape = (
           document.getElementsByTagName("body")[0].style.cursor = "nwse-resize";
         } else if (TR || BL) {
           document.getElementsByTagName("body")[0].style.cursor = "nesw-resize";
+        }
+      } else if (selectedShape?.type == "ellipse") {
+        const shape1 = {
+          id: -1,
+          type: "ellipse",
+          color: color,
+          stroke: stroke,
+          startX: selectedShape.startX + selectedShape.radius,
+          startY: selectedShape.startY,
+          radius: 5,
+        };
+
+        const shape2 = {
+          id: -1,
+          type: "ellipse",
+          color: color,
+          stroke: stroke,
+          startX: selectedShape.startX - selectedShape.radius,
+          startY: selectedShape.startY,
+          radius: 5,
+        };
+
+        const shape3 = {
+          id: -1,
+          type: "ellipse",
+          color: color,
+          stroke: stroke,
+          startX: selectedShape.startX,
+          startY: selectedShape.startY + selectedShape.radius,
+          radius: 5,
+        };
+
+        const shape4 = {
+          id: -1,
+          type: "ellipse",
+          color: color,
+          stroke: stroke,
+          startX: selectedShape.startX,
+          startY: selectedShape.startY - selectedShape.radius,
+          radius: 5,
+        };
+
+        ctx.strokeStyle = "blue";
+        ctx.beginPath();
+        ctx.arc(
+          selectedShape.startX + selectedShape.radius,
+          selectedShape.startY,
+          5,
+          0,
+          2 * Math.PI
+        );
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.strokeStyle = "blue";
+        ctx.beginPath();
+        ctx.arc(
+          selectedShape.startX - selectedShape.radius,
+          selectedShape.startY,
+          5,
+          0,
+          2 * Math.PI
+        );
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.strokeStyle = "blue";
+        ctx.beginPath();
+        ctx.arc(
+          selectedShape.startX,
+          selectedShape.startY + selectedShape.radius,
+          5,
+          0,
+          2 * Math.PI
+        );
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.strokeStyle = "blue";
+        ctx.beginPath();
+        ctx.arc(
+          selectedShape.startX,
+          selectedShape.startY - selectedShape.radius,
+          5,
+          0,
+          2 * Math.PI
+        );
+        ctx.stroke();
+        ctx.closePath();
+
+        ELR = findInterSection(event.clientX, event.clientY, shape1);
+        ELL = findInterSection(event.clientX, event.clientY, shape2);
+        ELT = findInterSection(event.clientX, event.clientY, shape3);
+        ELB = findInterSection(event.clientX, event.clientY, shape4);
+
+        if (ELR || ELL) {
+          document.getElementsByTagName("body")[0].style.cursor = "e-resize";
+        } else if (ELT || ELB) {
+          document.getElementsByTagName("body")[0].style.cursor = "n-resize";
         }
       }
     } else {
@@ -352,7 +451,7 @@ export const drawShape = (
           return shape.id !== selectedShape?.id;
         });
 
-        if (!TL && !TR && !BL && !BR) {
+        if (!TL && !TR && !BL && !BR && !ELR && !ELL && !ELT && !ELB) {
           if (selectedShape.type == "rectangle") {
             ctx.strokeStyle = selectedShape.color;
             ctx.lineWidth = selectedShape.stroke;
@@ -381,13 +480,6 @@ export const drawShape = (
             selectedShape.startX = event.clientX - rect.left - slecteOffsetX;
             selectedShape.startY = event.clientY - rect.left - slecteOffsetY;
           } else if (selectedShape.type == "line") {
-            console.log(
-              "line is selected",
-              selectedShape,
-              event.clientX,
-              event.clientY
-            );
-
             ctx.strokeStyle = selectedShape.color;
             ctx.lineWidth = selectedShape.stroke;
             ctx.beginPath();
@@ -411,6 +503,8 @@ export const drawShape = (
             selectedShape.moveX = newEndX - slecteOffsetX;
             selectedShape.moveY = newEndY - slecteOffsetY;
           } else if (selectedShape.type == "arrow") {
+            console.log("Arrow is selected");
+
             ctx.strokeStyle = selectedShape.color;
             ctx.lineWidth = selectedShape.stroke;
             ctx.beginPath();
@@ -519,13 +613,32 @@ export const drawShape = (
             selectedShape.startX = event.clientX;
             selectedShape.width = newWidth;
             selectedShape.height = newHeight;
-
             ctx.strokeRect(
               selectedShape.startX,
               selectedShape.startY,
               selectedShape.width,
               selectedShape.height
             );
+          } else if (selectedShape.type == "ellipse") {
+            ctx.strokeStyle = selectedShape.color;
+            ctx.lineWidth = selectedShape.stroke;
+
+            const radius = Math.sqrt(
+              Math.abs(event.clientX - selectedShape.startX) ** 2 +
+                Math.abs(event.clientY - selectedShape.startY) ** 2
+            );
+            ctx.beginPath();
+            ctx.arc(
+              selectedShape.startX,
+              selectedShape.startY,
+              radius,
+              0,
+              2 * Math.PI
+            );
+            ctx.stroke();
+            ctx.closePath();
+
+            selectedShape.radius = radius;
           }
         }
       }
