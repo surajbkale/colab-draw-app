@@ -1,6 +1,5 @@
 import { HTTP_BACKEND_URL } from "@repo/common/HTTP_BACKEND_URL";
 import axios from "axios";
-import { useEffect } from "react";
 
 interface Pencil {
   x: number;
@@ -61,7 +60,16 @@ type ExistingShape =
 let existingShape: ExistingShape[] = [];
 let pencilPath: Pencil[] = [];
 
-export const drawShape = async (
+let scale = 1; // Initial scale
+let minScale = 0.5;
+let maxScale = 2;
+let offsetX = 0;
+let offsetY = 0;
+
+const zoomFactor = 1.04; // Zoom factor (10% zoom per step)
+const zoomSpeed = 0.1;
+
+export const drawShape = (
   canvas: HTMLCanvasElement,
   socket: WebSocket,
   roomid: any,
@@ -71,6 +79,8 @@ export const drawShape = async (
 ) => {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
+
+  drawShapesBeforeClear(ctx, canvas, existingShape);
 
   let startX = 0;
   let startY = 0;
@@ -84,6 +94,7 @@ export const drawShape = async (
     canvas.removeEventListener("mousedown", previousListeners.mousedown);
     canvas.removeEventListener("mouseup", previousListeners.mouseup);
     canvas.removeEventListener("mousemove", previousListeners.mousemove);
+    canvas.removeEventListener("wheel", previousListeners.wheel);
   }
 
   // Define event handlers
@@ -97,8 +108,8 @@ export const drawShape = async (
   const handleMouseUp = (event: MouseEvent) => {
     clicked = false;
     const rect = canvas.getBoundingClientRect();
-    let width = event.clientX - startX - rect.left;
-    let height = event.clientY - startY - rect.top;
+    const width = event.clientX - startX - rect.left;
+    const height = event.clientY - startY - rect.top;
     let shape: ExistingShape | null = null;
     if (tool === "rectangle") {
       shape = {
@@ -159,8 +170,8 @@ export const drawShape = async (
   const handleMouseMove = (event: MouseEvent) => {
     if (clicked) {
       const rect = canvas.getBoundingClientRect();
-      let width = event.clientX - startX - rect.left;
-      let height = event.clientY - startY - rect.top;
+      const width = event.clientX - startX - rect.left;
+      const height = event.clientY - startY - rect.top;
 
       drawShapesBeforeClear(ctx, canvas, existingShape);
       ctx.strokeStyle = color;
@@ -187,10 +198,10 @@ export const drawShape = async (
         ctx.stroke();
         ctx.closePath();
 
-        let arrowLen = 10;
-        var dx = event.clientX - rect.left - startX;
-        var dy = event.clientY - rect.top - startY;
-        var angle = Math.atan2(dy, dx);
+        const arrowLen = 10;
+        let dx = event.clientX - rect.left - startX;
+        let dy = event.clientY - rect.top - startY;
+        let angle = Math.atan2(dy, dx);
         ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
         ctx.lineTo(
           event.clientX - rect.left - arrowLen * Math.cos(angle - Math.PI / 6),
@@ -225,16 +236,39 @@ export const drawShape = async (
     }
   };
 
+  const handleZoom = (event: WheelEvent) => {
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault(); // Prevents the page from scrolling
+      const direction = event.deltaY < 0 ? "in" : "out"; // Zoom in if scrolling up, out if scrolling down
+      const rect = canvas.getBoundingClientRect();
+
+      offsetX = event.clientX - rect.left; // Get X position relative to canvas
+      offsetY = event.clientY - rect.top; // Get Y position relative to canvas
+
+      let deltaY = event?.deltaY;
+      if (deltaY < 0 && scale <= maxScale) {
+        zoom(direction, offsetX, offsetY, ctx, canvas); // Zoom in
+        deltaY = 0;
+      } else if (deltaY > 0 && scale >= minScale) {
+        zoom(direction, offsetX, offsetY, ctx, canvas); // Zoom out
+        deltaY = 0;
+      }
+    }
+  };
+
   // Attach new event listeners
   canvas.addEventListener("mousedown", handleMouseDown);
   canvas.addEventListener("mouseup", handleMouseUp);
   canvas.addEventListener("mousemove", handleMouseMove);
+  // passivw - allows preventdefault to work
+  canvas.addEventListener("wheel", handleZoom, { passive: false });
 
   // Save new event listeners reference
   (canvas as any)._eventListeners = {
     mousedown: handleMouseDown,
     mouseup: handleMouseUp,
     mousemove: handleMouseMove,
+    wheel: handleZoom,
   };
 };
 
@@ -330,10 +364,10 @@ const drawShapesBeforeClear = (
       ctx.stroke();
       ctx.closePath();
 
-      let arrowLen = 10;
-      var dx = shape.moveX - shape.startX;
-      var dy = shape.moveY - shape.startY;
-      var angle = Math.atan2(dy, dx);
+      const arrowLen = 10;
+      let dx = shape.moveX - shape.startX;
+      let dy = shape.moveY - shape.startY;
+      let angle = Math.atan2(dy, dx);
 
       ctx.moveTo(shape.moveX, shape.moveY);
       ctx.lineTo(
@@ -365,4 +399,25 @@ const getShapes = async (roomid: any) => {
     return JSON.parse(data.message);
   });
   return parsedChat;
+};
+
+const zoom = (
+  direction: string,
+  offsetX: number,
+  offsetY: number,
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement
+) => {
+  if (direction === "in") {
+    scale *= zoomFactor;
+  } else if (direction === "out") {
+    scale /= zoomFactor;
+  }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.translate(offsetX, offsetY);
+  ctx.scale(scale, scale);
+  ctx.translate(-offsetX, -offsetY);
+  drawShapesBeforeClear(ctx, canvas, existingShape);
+  ctx.restore();
 };
