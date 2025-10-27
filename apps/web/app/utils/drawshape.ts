@@ -1,7 +1,7 @@
 import { drawShapesBeforeClear } from "./redraw-shape";
-import { findInterSection } from "./intersection-point";
+import { checkCorner, findInterSection } from "./intersection-point";
 import { zoom } from "./zoom-in-out";
-import { ExistingShape, Pencil } from "@/interfaces/interface";
+import { ExistingShape, Pencil } from "../../interfaces/interface";
 import { DrawEllipse, DrawLine, DrawRectangle } from "./shape";
 
 let existingShape: ExistingShape[] = [];
@@ -12,9 +12,6 @@ let minScale = 0.5;
 let maxScale = 2;
 let offsetX = 0;
 let offsetY = 0;
-
-const zoomFactor = 1.04; // Zoom factor (10% zoom per step)
-const zoomSpeed = 0.1;
 
 export const drawShape = (
   canvas: HTMLCanvasElement,
@@ -33,10 +30,8 @@ export const drawShape = (
   let startY = 0;
   let clicked = false;
   let selectedShape: ExistingShape | undefined;
-  let slecteOffsetX = 0;
-  let slecteOffsetY = 0;
-  let slectedX = 0;
-  let slectedY = 0;
+  let selectedOffset = 0;
+  let selecteOffsetY = 0;
 
   let TL = false;
   let TR = false;
@@ -69,8 +64,8 @@ export const drawShape = (
     if (tool == "select") {
       selectedShape = existingShape.find((shape) => {
         if (shape.type != "pencil") {
-          slecteOffsetX = event.clientX - shape?.startX;
-          slecteOffsetY = event.clientY - shape?.startY;
+          selectedOffset = event.clientX - shape?.startX;
+          selecteOffsetY = event.clientY - shape?.startY;
         }
         return findInterSection(
           event.clientX - rect.left,
@@ -92,195 +87,179 @@ export const drawShape = (
         // ctx.strokeRect(selectedShape.width+selectedShape.startX, selectedShape.height+selectedShape.startY, 5, 5);
         // ctx.strokeRect(selectedShape.startX-10, selectedShape.startY-10, selectedShape.width+20, selectedShape.height+20);
 
-        const shape1 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: zoneX1,
-          startY: zoneY1,
-          radius: 20,
-        };
+        const topLeftCorner = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          zoneX1,
+          zoneY1,
+          15
+        );
+        const bottomRightCorner = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          zoneX1 + selectedShape.width,
+          zoneY1 + selectedShape.height,
+          15
+        );
+        const topRightCorner = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          selectedShape.startX,
+          selectedShape.startY + selectedShape.height,
+          15
+        );
+        const bottomLeftCorner = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          selectedShape.startX + selectedShape.width,
+          selectedShape.startY,
+          15
+        );
 
-        const shape2 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: zoneX1 + selectedShape.width,
-          startY: zoneY1 + selectedShape.height,
-          radius: 20,
-        };
+        //checking pointer at every corner to resize the shape
+        TL = findInterSection(event.clientX, event.clientY, topLeftCorner);
+        BR = findInterSection(event.clientX, event.clientY, bottomRightCorner);
+        TR = findInterSection(event.clientX, event.clientY, topRightCorner);
+        BL = findInterSection(event.clientX, event.clientY, bottomLeftCorner);
 
-        const shape3 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: selectedShape.startX,
-          startY: selectedShape.startY + selectedShape.height,
-          radius: 20,
-        };
-
-        const shape4 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: selectedShape.startX + selectedShape.width,
-          startY: selectedShape.startY,
-          radius: 20,
-        };
-
-        TL = findInterSection(event.clientX, event.clientY, shape1);
-        BR = findInterSection(event.clientX, event.clientY, shape2);
-        TR = findInterSection(event.clientX, event.clientY, shape3);
-        BL = findInterSection(event.clientX, event.clientY, shape4);
-
-        console.log("is inside", TL, TR, BL, BR);
-
-        if (TL || BR) {
-          document.getElementsByTagName("body")[0].style.cursor = "nwse-resize";
-        } else if (TR || BL) {
-          document.getElementsByTagName("body")[0].style.cursor = "nesw-resize";
-        }
+        if (TL || BR || TR || BL)
+          document.getElementsByTagName("body")[0].style.cursor = "pointer";
       } else if (selectedShape?.type == "ellipse") {
-        const shape1 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: selectedShape.startX + selectedShape.radius,
-          startY: selectedShape.startY,
-          radius: 5,
-        };
-
-        const shape2 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: selectedShape.startX - selectedShape.radius,
-          startY: selectedShape.startY,
-          radius: 5,
-        };
-
-        const shape3 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: selectedShape.startX,
-          startY: selectedShape.startY + selectedShape.radius,
-          radius: 5,
-        };
-
-        const shape4 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: selectedShape.startX,
-          startY: selectedShape.startY - selectedShape.radius,
-          radius: 5,
-        };
+        const right = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          selectedShape.startX + selectedShape.radius,
+          selectedShape.startY,
+          15
+        );
+        const left = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          selectedShape.startX - selectedShape.radius,
+          selectedShape.startY,
+          15
+        );
+        const top = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          selectedShape.startX,
+          selectedShape.startY + selectedShape.radius,
+          15
+        );
+        const bottom = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          selectedShape.startX,
+          selectedShape.startY - selectedShape.radius,
+          15
+        );
 
         DrawEllipse(
           ctx,
           selectedShape.startX + selectedShape.radius,
           selectedShape.startY,
-          3,
-          4
+          7,
+          8
         );
         DrawEllipse(
           ctx,
           selectedShape.startX - selectedShape.radius,
           selectedShape.startY,
-          3,
-          4
+          7,
+          8
         );
         DrawEllipse(
           ctx,
           selectedShape.startX,
           selectedShape.startY + selectedShape.radius,
-          3,
-          4
+          7,
+          8
         );
         DrawEllipse(
           ctx,
           selectedShape.startX,
           selectedShape.startY - selectedShape.radius,
-          3,
-          4
+          7,
+          8
         );
 
-        ELR = findInterSection(event.clientX, event.clientY, shape1);
-        ELL = findInterSection(event.clientX, event.clientY, shape2);
-        ELT = findInterSection(event.clientX, event.clientY, shape3);
-        ELB = findInterSection(event.clientX, event.clientY, shape4);
+        ELR = findInterSection(event.clientX, event.clientY, right);
+        ELL = findInterSection(event.clientX, event.clientY, left);
+        ELT = findInterSection(event.clientX, event.clientY, top);
+        ELB = findInterSection(event.clientX, event.clientY, bottom);
 
-        if (ELR || ELL) {
-          document.getElementsByTagName("body")[0].style.cursor = "e-resize";
-        } else if (ELT || ELB) {
-          document.getElementsByTagName("body")[0].style.cursor = "n-resize";
-        }
+        if (ELR || ELL || ELT || ELB)
+          document.getElementsByTagName("body")[0].style.cursor = "pointer";
       } else if (selectedShape?.type == "line") {
-        DrawEllipse(ctx, selectedShape.startX, selectedShape.startY, 3, 4);
-        DrawEllipse(ctx, selectedShape.moveX, selectedShape.moveY, 3, 4);
-        const shape1 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: selectedShape.moveX,
-          startY: selectedShape.moveY,
-          radius: 5,
-        };
+        DrawEllipse(ctx, selectedShape.startX, selectedShape.startY, 7, 8);
+        DrawEllipse(ctx, selectedShape.moveX, selectedShape.moveY, 7, 8);
 
-        const shape2 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: selectedShape.startX,
-          startY: selectedShape.startY,
-          radius: 5,
-        };
+        const right = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          selectedShape.moveX,
+          selectedShape.moveY,
+          15
+        );
+        const left = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          selectedShape.startX,
+          selectedShape.startY,
+          15
+        );
 
-        LNS = findInterSection(event.clientX, event.clientY, shape1);
-        LNE = findInterSection(event.clientX, event.clientY, shape2);
+        LNS = findInterSection(event.clientX, event.clientY, right);
+        LNE = findInterSection(event.clientX, event.clientY, left);
 
         if (LNS || LNE) {
           document.getElementsByTagName("body")[0].style.cursor = "pointer";
         }
       } else if (selectedShape?.type == "arrow") {
-        DrawEllipse(ctx, selectedShape.startX, selectedShape.startY, 3, 4);
-        DrawEllipse(ctx, selectedShape.moveX, selectedShape.moveY, 3, 4);
+        DrawEllipse(ctx, selectedShape.startX, selectedShape.startY, 7, 8);
+        DrawEllipse(ctx, selectedShape.moveX, selectedShape.moveY, 7, 8);
 
-        const shape1 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: selectedShape.moveX,
-          startY: selectedShape.moveY,
-          radius: 5,
-        };
+        const right = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          selectedShape.moveX,
+          selectedShape.moveY,
+          15
+        );
+        const left = checkCorner(
+          -1,
+          "ellipse",
+          color,
+          stroke,
+          selectedShape.startX,
+          selectedShape.startY,
+          15
+        );
 
-        const shape2 = {
-          id: -1,
-          type: "ellipse",
-          color: color,
-          stroke: stroke,
-          startX: selectedShape.startX,
-          startY: selectedShape.startY,
-          radius: 5,
-        };
-
-        ARRS = findInterSection(event.clientX, event.clientY, shape1);
-        ARRE = findInterSection(event.clientX, event.clientY, shape2);
-
-        console.log(ARRE, ARRS);
+        ARRS = findInterSection(event.clientX, event.clientY, right);
+        ARRE = findInterSection(event.clientX, event.clientY, left);
 
         if (ARRS || ARRE) {
           document.getElementsByTagName("body")[0].style.cursor = "pointer";
@@ -462,20 +441,20 @@ export const drawShape = (
             ctx.strokeStyle = selectedShape.color;
             ctx.lineWidth = selectedShape.stroke;
             ctx.strokeRect(
-              event.clientX - rect.left - slecteOffsetX,
-              event.clientY - rect.top - slecteOffsetY,
+              event.clientX - rect.left - selectedOffset,
+              event.clientY - rect.top - selecteOffsetY,
               selectedShape.width,
               selectedShape.height
             );
-            selectedShape.startX = event.clientX - rect.left - slecteOffsetX;
-            selectedShape.startY = event.clientY - rect.left - slecteOffsetY;
+            selectedShape.startX = event.clientX - rect.left - selectedOffset;
+            selectedShape.startY = event.clientY - rect.left - selecteOffsetY;
           } else if (selectedShape.type == "ellipse") {
             ctx.strokeStyle = selectedShape.color;
             ctx.lineWidth = selectedShape.stroke;
             ctx.beginPath();
             ctx.arc(
-              event.clientX - rect.left - slecteOffsetX,
-              event.clientY - rect.top - slecteOffsetY,
+              event.clientX - rect.left - selectedOffset,
+              event.clientY - rect.top - selecteOffsetY,
               selectedShape.radius,
               0,
               2 * Math.PI
@@ -483,8 +462,8 @@ export const drawShape = (
             ctx.stroke();
             ctx.closePath();
 
-            selectedShape.startX = event.clientX - rect.left - slecteOffsetX;
-            selectedShape.startY = event.clientY - rect.left - slecteOffsetY;
+            selectedShape.startX = event.clientX - rect.left - selectedOffset;
+            selectedShape.startY = event.clientY - rect.left - selecteOffsetY;
           } else if (selectedShape.type == "line") {
             ctx.strokeStyle = selectedShape.color;
             ctx.lineWidth = selectedShape.stroke;
@@ -498,16 +477,16 @@ export const drawShape = (
             let newEndY =
               newStartY + (selectedShape.moveY - selectedShape.startY);
 
-            ctx.moveTo(newStartX - slecteOffsetX, newStartY - slecteOffsetY);
-            ctx.lineTo(newEndX - slecteOffsetX, newEndY - slecteOffsetY);
+            ctx.moveTo(newStartX - selectedOffset, newStartY - selecteOffsetY);
+            ctx.lineTo(newEndX - selectedOffset, newEndY - selecteOffsetY);
             ctx.stroke();
             ctx.closePath();
 
             // Update shape's new position
-            selectedShape.startX = newStartX - slecteOffsetX;
-            selectedShape.startY = newStartY - slecteOffsetY;
-            selectedShape.moveX = newEndX - slecteOffsetX;
-            selectedShape.moveY = newEndY - slecteOffsetY;
+            selectedShape.startX = newStartX - selectedOffset;
+            selectedShape.startY = newStartY - selecteOffsetY;
+            selectedShape.moveX = newEndX - selectedOffset;
+            selectedShape.moveY = newEndY - selecteOffsetY;
           } else if (selectedShape.type == "arrow") {
             console.log("Arrow is selected");
 
@@ -524,8 +503,8 @@ export const drawShape = (
               newStartY + (selectedShape.moveY - selectedShape.startY);
 
             ctx.beginPath();
-            ctx.moveTo(newStartX - slecteOffsetX, newStartY - slecteOffsetY);
-            ctx.lineTo(newEndX - slecteOffsetX, newEndY - slecteOffsetY);
+            ctx.moveTo(newStartX - selectedOffset, newStartY - selecteOffsetY);
+            ctx.lineTo(newEndX - selectedOffset, newEndY - selecteOffsetY);
             ctx.stroke();
             ctx.closePath();
 
@@ -534,30 +513,34 @@ export const drawShape = (
             let dy = newEndY - newStartY;
             let angle = Math.atan2(dy, dx);
 
-            ctx.moveTo(newEndX - slecteOffsetX, newEndY - slecteOffsetY);
+            ctx.moveTo(newEndX - selectedOffset, newEndY - selecteOffsetY);
             ctx.lineTo(
               newEndX -
-                slecteOffsetX -
+                selectedOffset -
                 arrowLen * Math.cos(angle - Math.PI / 6),
-              newEndY - slecteOffsetY - arrowLen * Math.sin(angle - Math.PI / 6)
+              newEndY -
+                selecteOffsetY -
+                arrowLen * Math.sin(angle - Math.PI / 6)
             );
             ctx.stroke();
 
-            ctx.moveTo(newEndX - slecteOffsetX, newEndY - slecteOffsetY);
+            ctx.moveTo(newEndX - selectedOffset, newEndY - selecteOffsetY);
             ctx.lineTo(
               newEndX -
-                slecteOffsetX -
+                selectedOffset -
                 arrowLen * Math.cos(angle + Math.PI / 6),
-              newEndY - slecteOffsetY - arrowLen * Math.sin(angle + Math.PI / 6)
+              newEndY -
+                selecteOffsetY -
+                arrowLen * Math.sin(angle + Math.PI / 6)
             );
 
             ctx.stroke();
 
             // Update shape's new position
-            selectedShape.startX = newStartX - slecteOffsetX;
-            selectedShape.startY = newStartY - slecteOffsetY;
-            selectedShape.moveX = newEndX - slecteOffsetX;
-            selectedShape.moveY = newEndY - slecteOffsetY;
+            selectedShape.startX = newStartX - selectedOffset;
+            selectedShape.startY = newStartY - selecteOffsetY;
+            selectedShape.moveX = newEndX - selectedOffset;
+            selectedShape.moveY = newEndY - selecteOffsetY;
           }
         } else {
           if (selectedShape.type == "rectangle" && TL) {

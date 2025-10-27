@@ -49,3 +49,23 @@ export const findInterSection = (x: any, y: any, existingShape: any) => {
     return truth;
   }
 };
+
+export const checkCorner = (
+  id: number,
+  type: string,
+  color: string,
+  stroke: number,
+  startX: number,
+  startY: number,
+  radius: number
+) => {
+  return {
+    id,
+    type,
+    color,
+    stroke,
+    startX,
+    startY,
+    radius,
+  };
+};
