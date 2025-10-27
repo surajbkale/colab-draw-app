@@ -7,8 +7,7 @@
     "build": "tsc -b",
     "start": "node ./dist/index.js",
     "dev": "pnpm run build && pnpm run start",
-    "lint": "pnpm eslint",
-    "postinstall": "prisma generate"
+    "lint": "pnpm eslint"
   },
   "devDependencies": {
     "@repo/db": "workspace:*",

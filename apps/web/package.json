@@ -11,14 +11,19 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.54",
     "@repo/common": "workspace:*",
     "@repo/ui": "workspace:*",
     "@types/axios": "^0.14.4",
+    "ai": "^5.0.81",
+    "antd": "^5.27.6",
     "axios": "^1.12.2",
     "lucide-react": "^0.544.0",
     "next": "^15.4.2",
+    "openai": "^6.7.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^15.4.6",
