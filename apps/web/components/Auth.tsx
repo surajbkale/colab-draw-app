@@ -1,12 +1,15 @@
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import { Moon, Sun, Mail, Lock, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { HTTP_BACKEND_URL } from "@repo/common/HTTP_BACKEND_URL";
+import { getAuthToken, setAuthToken } from "../auth/auth";
 
-function Auth({ comp }: { comp: "signin" | "signup" }) {
+function Auth({ comp }: { comp: string }) {
   const router = useRouter();
+
   const [userData, setUserData] = useState({
     name: "",
     email: "",
@@ -18,13 +21,19 @@ function Auth({ comp }: { comp: "signin" | "signup" }) {
       `${HTTP_BACKEND_URL}/user/${comp == "signin" ? "signin" : "signup"}`,
       userData
     );
-
     if (response.data) {
-      console.log(response);
-      localStorage.setItem("token", response.data.token);
+      setAuthToken(response.data.token);
       router.push("/rooms");
     }
   };
+
+  useEffect(() => {
+    const token = getAuthToken(); // Check for token in localStorage
+
+    if (token) {
+      router.push("/rooms"); // Redirect to main page if authenticated
+    }
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center p-4">
@@ -32,10 +41,11 @@ function Auth({ comp }: { comp: "signin" | "signup" }) {
         {/* Toggle Container */}
         <div className="bg-white rounded shadow-xl overflow-hidden">
           <div className="relative h-12 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+
           {/* Form Container */}
           <div className="p-8">
             <div className="space-y-6">
-              {comp !== "signin" && (
+              {comp != "signin" && (
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
