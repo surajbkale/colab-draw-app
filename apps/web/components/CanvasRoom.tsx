@@ -1,16 +1,17 @@
 "use client";
+import { Spin } from "antd";
 import Canvas from "./Canvas";
 import useSocket from "../app/hooks/useSocket";
 
-const CanvasRoom = (roomid: { roomId: string }) => {
-  const { loading, socket } = useSocket(roomid.roomId);
+const CanvasRoom = (roomid: any) => {
+  const { loading, socket } = useSocket(roomid.roomid);
 
-  if (!socket) return <h1 className="text-black">Loading the content...</h1>;
+  // if (!socket) return <div className="flex justify-center items-center pt-12"><Spin/></div>
 
-  return (
-    <div>
-      <Canvas socket={socket} roomid={roomid.roomId} />
-    </div>
+  return !socket ? (
+    <div className="flex justify-center items-center pt-12">Loading....</div>
+  ) : (
+    <Canvas socket={socket} roomid={roomid.roomid} />
   );
 };
 
