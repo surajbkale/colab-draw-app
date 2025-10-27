@@ -549,24 +549,6 @@ export const drawShape = (
             selectedShape.moveX = newEndX - selectedOffsetX;
             selectedShape.moveY = newEndY - selecteOffsetY;
           } else if (selectedShape.type == "pencil") {
-            // let minX= Infinity;
-            // let minY = Infinity;
-            // let maxX = -Infinity;
-            // let maxY = -Infinity;
-
-            // for(let i=0;i<selectedShape.path.length;i++){
-            //   minX=Math.min(minX, selectedShape.path[i].x);
-            //   minY=Math.min(minY, selectedShape.path[i].y);
-            //   maxX=Math.max(maxX, selectedShape.path[i].x);
-            //   maxY=Math.max(maxY, selectedShape.path[i].y);
-            // }
-
-            // ctx.strokeStyle="blue";
-            // ctx.lineWidth=0.3;
-
-            // DrawRectangle(ctx, minX, minY, maxX-minX, maxY-minY);
-
-            // Logic to redraw a pencil
             const offsetX =
               event.clientX - selectedShape.path[0].x - selectedOffsetX;
             const offsetY =
@@ -576,6 +558,12 @@ export const drawShape = (
             ctx.lineWidth = stroke;
             ctx.beginPath();
 
+            // Update the stored path with new coordinates
+            for (let i = 0; i < selectedShape.path.length; i++) {
+              selectedShape.path[i].x += offsetX;
+              selectedShape.path[i].y += offsetY;
+            }
+
             for (let i = 1; i < selectedShape.path.length; i++) {
               const prevPoint = selectedShape.path[i - 1];
               const currPoint = selectedShape.path[i];
@@ -583,6 +571,8 @@ export const drawShape = (
               ctx.moveTo(prevPoint.x + offsetX, prevPoint.y + offsetY);
               ctx.lineTo(currPoint.x + offsetX, currPoint.y + offsetY);
             }
+
+            // console.log("Points isss", prevPoint.x + offsetX, prevPoint.y + offsetY );
 
             ctx.stroke();
             console.log("Pencil shape moved", selectedShape);
